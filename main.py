@@ -2,22 +2,48 @@ import time
 import serial
 import serial.tools.list_ports
 import os
+import sys
 from os import system
 from colorama import *
+import requests
+import keyboard
 
 # Colors
 blue = Fore.BLUE
 purple = Fore.MAGENTA
 green = Fore.GREEN
+red = Fore.RED
 yellow = Fore.YELLOW
 white = Fore.WHITE
 gray = Fore.LIGHTBLACK_EX
 orange = Fore.LIGHTYELLOW_EX
 
+# Settings
+developer_mode = True
+
 # Init
 system('title M-Terminal (Loading)')
+version = "1.0.1"
+
+def get_latest_release(repo_owner, repo_name):
+    url = f"https://api.github.com/repos/{repo_owner}/{repo_name}/releases/latest"
+    response = requests.get(url)
+
+    if response.status_code == 200:
+        release_info = response.json()
+        return release_info['tag_name']
+    else:
+        print(f"Error: Unable to get release information. Status code: {response.status_code}")
+        return None
+
+repo_owner = "justcallmekoko"
+repo_name = "ESP32Marauder"
+marauder_version = get_latest_release(repo_owner, repo_name)
+
 
 # Menus
+
+
 
 def menu1():
     os.system('cls')
@@ -64,7 +90,11 @@ def menu2():
             print(f"{yellow}- {port.device}")
             input(f"{gray}Press {green}ENTER{gray} to continue")
             main()
-
+    else:
+        print(yellow + "There are no active ports")
+        input(f"{gray}Press {green}ENTER{gray} to continue")
+        main()
+            
 
 def connect_to_serial(port, baudrate=115200, timeout=1):
     try:
@@ -73,27 +103,31 @@ def connect_to_serial(port, baudrate=115200, timeout=1):
         print(f"Error: {e}")
         return None
 
+
 def serial_console(serial_connection):
-    print(green + "Console - Version 1.0.0" + yellow)
+    print(f"{yellow}M-Terminal {gray}{version}{yellow} - Hold 'Spacebar' to exit")
 
     accumulated_data = []
     user_input = input("> ")
 
-    while True:
-        
-        if user_input.lower() == 'exit':
-            break
+    if user_input == "exit":
+        main()
 
+    while True:     
         accumulated_data.append(user_input)
         serialized_data = "\n".join(accumulated_data) + "\n"
         serial_connection.write(serialized_data.encode())
         received_data = serial_connection.read_all().decode("utf-8")
         print(received_data, end="")
+        if keyboard.is_pressed("space"):
+            print(f"Ending loop")
+            break
         time.sleep(3)
+
 
 def menu3():
     os.system('cls')
-    print(green + "Please specify which port (e.g., COM1)" + white)
+    print(yellow + "Please specify which port (e.g., COM1)" + white)
     port_name = input("> ")
 
     serial_connection = connect_to_serial(f"COM{port_name}")
@@ -104,19 +138,19 @@ def menu3():
             system(f'title M-Terminal (Active - COM{port_name})')
             serial_console(serial_connection)
         finally:
-            # Close the serial connection when done
             serial_connection.close()
             main()
     
 
 def menu4():
-    os.system('cls')
-    print(
-f"""
-{blue}Developer: {gray}jbablestime
-""")
+    os.system('cls')   
+    print(f"""
+{gray}[{yellow}Developer{gray}] {blue}jbablestime
+{gray}[{yellow}Version{gray}] {green}{version}
+{gray}[{yellow}Marauder Version{gray}] {marauder_version}""")
     input(f"{gray}Press {green}ENTER{gray} to continue")
     main()
+
 
 def main():
     system('title M-Terminal (Inactive)')
@@ -133,6 +167,20 @@ def main():
     elif command == "4":
         menu4()
 
-# Run
-main()
+if __name__ == "__main__":
+    file_path = sys.argv[0]
 
+    if file_path.lower().endswith(".py") and developer_mode == False:
+        print(f"{red}Error: {yellow}This script cannot be executed as a Python file. Please run the {green}installer.bat")
+        time.sleep(5)
+        sys.exit()
+    elif file_path.lower().endswith(".exe") and developer_mode == False:
+        print("Starting...")
+        print(f"You're using {blue}M-Terminal {green}{version}" + white)
+        time.sleep(2)
+        main()
+    elif file_path.lower().endswith(".py") and developer_mode == True:
+        print("Starting...")
+        print(f"You're using {blue}M-Terminal {green}{version}" + white)
+        time.sleep(2)
+        main()
