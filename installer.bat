@@ -8,6 +8,8 @@ echo Starting installer...
 py -m pip install pyserial
 py -m pip install colorama
 py -m pip install pyinstaller
+py -m pip install tk
+py -m pip install psutil
 echo Finished installing
 timeout /nobreak /t 3 >nul
 cls
@@ -15,6 +17,7 @@ echo Starting build...
 pyinstaller --onefile main.py
 cls
 echo Cleaning up...
+mkdir files
 del main.spec
 del main.py
 rmdir /s /q build
