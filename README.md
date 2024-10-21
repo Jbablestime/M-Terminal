@@ -12,7 +12,7 @@ And you're all set!
 ## Requirements
 - An Internet Connection
 - Python 3.11+ ([Download](https://www.python.org/downloads/))
-- [OPTIONAL] ESP32 Marauder ([Buy Here](https://superconvenientstore.com/products/supcon-tool-v3-pre-orders))
+- [OPTIONAL] ESP32 Marauder
 
 ## Problems?
 E-mail me at `jb@polardev.net`
